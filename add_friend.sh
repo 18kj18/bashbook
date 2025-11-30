@@ -17,7 +17,7 @@ fi
 #Check if user 2 is already a friend of user 1
 if grep -w "$2" ./"$1"/friends.txt > /dev/null; then
 	#Users are already friends
-	echo ok: Friend added!
+	echo ok: Friend already added!
 	exit 0
 else
 	echo "$2" >> ./"$1"/friends.txt

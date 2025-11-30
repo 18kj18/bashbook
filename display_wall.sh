@@ -6,7 +6,6 @@ if ! ls | grep -w "$1" > /dev/null; then
 	echo nok: User "$1" does not exist
 else
 	#Print wall	
-	echo start_of_file
+	echo "$1'"s Wall--
 	cat ./"$1"/wall.txt
-	echo end_of_file
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Check if the user entered a valid username, create the user if needed
+#Checks if the user entered a valid username, creates the user if needed
 if [ -z "$1" ]; then
 	echo "[ERROR]: Usage: client.sh <username>"
 	exit
@@ -14,15 +14,28 @@ else
 		./create.sh "$client";
 	fi
 fi
+client_pipe="${client}.pipe"
+server_pipe="server.pipe"
 
-in_pipe=""$client"_pipe"
-out_pipe="server_pipe"
+# Creates the client pipe
+if [[ ! -p "$client_pipe" ]]; then
+	rm -f "$client_pipe"
+    mkfifo "$client_pipe" 
+fi
 
 # Until user exits with CTRL+C, loop
+(
+    while true; do
+        if read -r response < "$client_pipe"; then
+            echo "$response"
+        fi
+    done
+) &
 while true; do
 	echo -----------------------------------
 	echo Options: add, post, display
 	read -p "--> " cmd usr msg
+
 
 	case "$cmd" in
 		add)
@@ -30,7 +43,7 @@ while true; do
 				echo "[ERROR]: Usage: add <username>"
 			else
 				if [ -d "$usr" ]; then
-					sh ./add_friend.sh "$client" "$usr"
+					echo "$client add $usr" > "$server_pipe"
 				else
 					echo "[ERROR]: Cannot add. $usr doesn't exist!"
 				fi
@@ -41,7 +54,7 @@ while true; do
 				echo "[ERROR]: Usage: post <username> <message>"
 			else
 				if [ -d "$usr" ]; then
-					sh ./post_message.sh "$client" "$usr" "$msg"
+					echo "$client post $usr $msg" > "$server_pipe"
 				else
 					echo "[ERROR]: $usr doesn't exist!"
 				fi
@@ -52,7 +65,7 @@ while true; do
 				echo "[ERROR]: Usage: display <username>"
 			else
 				if [ -d "$usr" ]; then
-					sh display_wall.sh "$usr"
+					echo "$client display $usr" > "$server_pipe"
 				else
 					echo "[ERROR]: $usr doesn't exist!"
 				fi
@@ -62,4 +75,7 @@ while true; do
 			echo "[ERROR]: Invalid command"
 			;;
 	esac
+    #Gives time for background process
+    sleep 1
 done
+rm -f "$client_pipe"

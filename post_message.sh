@@ -22,5 +22,6 @@ if ! grep -w "$1" ./"$2"/friends.txt > /dev/null && [ ! "$1" = "$2" ]; then
 fi
 
 #Send message to second user's wall from user 1
+echo Message sent!
 echo "$1": "$3" >> ./"$2"/wall.txt
 
